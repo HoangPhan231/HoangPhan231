@@ -1,88 +1,114 @@
-name: 🐾 GitHub Snake Game Ultimate
+name: 🐍 GitHub Snake Game Plus
 
 on:
   schedule:
-    - cron: "0 0 * * *"
-  workflow_dispatch:
+    - cron: "0 0 * * *"  # Chạy hàng ngày lúc 0h UTC
+  workflow_dispatch:     # Cho phép chạy thủ công
   push:
     branches:
-      - main
+      - main           # Kích hoạt khi push vào main
 
 jobs:
-  generate-game:
+  generate-snake:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    name: Generate amazing animated characters
-
+    timeout-minutes: 15
+    name: Generate awesome snake animations
+    
     steps:
+      # Bước 1: Checkout code
       - name: 🛎️ Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 🎨 Generate Animations with Dynamic Characters
+      # Bước 2: Tạo nhiều phiên bản snake khác nhau
+      - name: 🎨 Generate Snake Animations
         uses: Platane/snk@v3
         id: snake
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
-            dist/dragon-chasing.svg?character=dragon&effect=fire
-            dist/unicorn-dance.svg?character=unicorn&effect=rainbow
-            dist/robot-explorer.svg?character=robot&effect=laser
-            dist/spacecraft-flyby.svg?character=spacecraft&effect=stars
-            dist/leaderboard.json?mode=community
+            dist/standard.svg
+            dist/rainbow-snake.svg?color_snake=rainbow&color_dots=random
+            dist/dark-mode.svg?palette=github-dark&color_snake=#00ff00
+            dist/matrix.gif?color_snake=#00ff00&color_dots=#004400&background=black&delay=10
+            dist/ocean-wave.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9&delay=15
+            dist/golden-snake.gif?color_snake=gold&color_dots=#ffd700,#ffcc00,#ffc000
 
+      # Bước 3: Cài đặt ImageMagick để xử lý ảnh
       - name: 🛠️ Install ImageMagick
         if: steps.snake.outputs.has_changes == 'true'
         run: sudo apt-get install -y imagemagick
 
-      - name: ✨ Optimize Animations
+      # Bước 4: Tối ưu kích thước file ảnh
+      - name: ✨ Optimize Images
         if: steps.snake.outputs.has_changes == 'true'
         run: |
-          convert dist/robot-explorer.svg -resize 800x400 -layers optimize dist/robot-optimized.gif
-          convert dist/spacecraft-flyby.svg -resize 800x400 -layers optimize dist/spacecraft-optimized.gif
+          convert dist/matrix.gif -resize 800x400 -layers optimize dist/matrix-optimized.gif
+          convert dist/ocean-wave.gif -resize 800x400 -layers optimize dist/ocean-optimized.gif
+          convert dist/golden-snake.gif -resize 800x400 -layers optimize dist/golden-optimized.gif
 
-      - name: 📝 Generate README with Leaderboard
+      # Bước 5: Tạo README tự động
+      - name: 📝 Generate Dynamic README
         if: steps.snake.outputs.has_changes == 'true'
         run: |
           cat << EOF > README.md
-          # 🐾 GitHub Contribution Game Ultimate
+          # 🐍 GitHub Contribution Snake Game
 
           ![Workflow Status](https://img.shields.io/github/actions/workflow/status/${{ github.repository }}/snake.yml?label=Snake%20Game&style=for-the-badge)
 
-          ## 🎮 Amazing Animated Characters
+          ## 🎮 Different Snake Variations
 
-          ### Dragon Chasing with Fire
-          ![Dragon](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/dragon-chasing.svg)
+          ### Standard Version
+          ![Standard Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/standard.svg)
 
-          ### Unicorn Dancing with Rainbow
-          ![Unicorn](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/unicorn-dance.svg)
+          ### Rainbow Mode 🌈
+          ![Rainbow Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/rainbow-snake.svg)
 
-          ### Robot Explorer with Laser
-          ![Robot](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/robot-optimized.gif)
+          ### Dark Mode
+          ![Dark Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/dark-mode.svg)
 
-          ### Spacecraft Flyby with Stars
-          ![Spacecraft](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/spacecraft-optimized.gif)
+          ### Matrix Effect
+          ![Matrix Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/matrix-optimized.gif)
 
-          ## 🏆 Leaderboard
-          View the [Community Leaderboard](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/leaderboard.json) to see top contributors!
+          ### Ocean Wave
+          ![Ocean Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/ocean-optimized.gif)
+
+          ### Golden Snake
+          ![Golden Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/golden-optimized.gif)
 
           *Auto-generated with ❤️ by GitHub Actions*
           EOF
 
+      # Bước 6: Deploy lên branch output
       - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: output
+          commit_message: "Update snake animations [skip ci]"
+          force_orphan: true
 
+      # Bước 7: Tự động tạo Pull Request nếu có thay đổi README
       - name: 🔄 Create Pull Request
         if: github.ref != 'refs/heads/output' && steps.snake.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v4
         with:
-          title: "✨ Update Animations with Dynamic Characters"
-          branch: "update-ultimate-characters"
+          title: "✨ Update Snake Animations & README"
+          branch: "update-snake-content"
           base: "main"
-          body: "Added animations for new dynamic characters with effects (dragon, unicorn, robot, spacecraft). Includes leaderboard integration."
-          commit-message: "Update ultimate character animations [skip ci]"
+          body: |
+            Auto-generated PR with:
+            - New snake animations
+            - Updated README display
+            - Optimized GIF files
+          commit-message: "Update snake content [skip ci]"
+          labels: "automated,enhancement"
+
+      # Bước 8: Thông báo kết quả
+      - name: 📢 Notification
+        if: always()
+        run: |
+          echo "Snake generation completed with status: ${{ job.status }}"
+          echo "View results at: https://github.com/${{ github.repository }}/tree/output"
