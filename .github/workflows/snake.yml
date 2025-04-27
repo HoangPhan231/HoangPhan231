@@ -1,45 +1,114 @@
-name: GitHub Snake Game
+name: 🐍 GitHub Snake Game Plus
 
 on:
-  # Chạy workflow hằng ngày vào 0 giờ UTC
   schedule:
-    - cron: "0 0 * * *"
-  
-  # Cho phép chạy workflow thủ công
-  workflow_dispatch:
-
-  # Kích hoạt khi có thay đổi trên nhánh `main`
+    - cron: "0 0 * * *"  # Chạy hàng ngày lúc 0h UTC
+  workflow_dispatch:     # Cho phép chạy thủ công
   push:
     branches:
-      - main
+      - main           # Kích hoạt khi push vào main
 
 jobs:
-  generate:
+  generate-snake:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
+    timeout-minutes: 15
+    name: Generate awesome snake animations
+    
     steps:
-      # Bước 1: Clone repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      # Bước 1: Checkout code
+      - name: 🛎️ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Bước 2: Tạo animation snake
-      - name: Generate GitHub Contributions Snake Animations
+      # Bước 2: Tạo nhiều phiên bản snake khác nhau
+      - name: 🎨 Generate Snake Animations
         uses: Platane/snk@v3
+        id: snake
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
-            dist/github-snake.svg
-            dist/github-snake-dark.svg?palette=github-dark
-            dist/ocean.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            dist/standard.svg
+            dist/rainbow-snake.svg?color_snake=rainbow&color_dots=random
+            dist/dark-mode.svg?palette=github-dark&color_snake=#00ff00
+            dist/matrix.gif?color_snake=#00ff00&color_dots=#004400&background=black&delay=10
+            dist/ocean-wave.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9&delay=15
+            dist/golden-snake.gif?color_snake=gold&color_dots=#ffd700,#ffcc00,#ffc000
 
-      # Bước 3: Deploy lên branch `output`
-      - name: Deploy to Output Branch
+      # Bước 3: Cài đặt ImageMagick để xử lý ảnh
+      - name: 🛠️ Install ImageMagick
+        if: steps.snake.outputs.has_changes == 'true'
+        run: sudo apt-get install -y imagemagick
+
+      # Bước 4: Tối ưu kích thước file ảnh
+      - name: ✨ Optimize Images
+        if: steps.snake.outputs.has_changes == 'true'
+        run: |
+          convert dist/matrix.gif -resize 800x400 -layers optimize dist/matrix-optimized.gif
+          convert dist/ocean-wave.gif -resize 800x400 -layers optimize dist/ocean-optimized.gif
+          convert dist/golden-snake.gif -resize 800x400 -layers optimize dist/golden-optimized.gif
+
+      # Bước 5: Tạo README tự động
+      - name: 📝 Generate Dynamic README
+        if: steps.snake.outputs.has_changes == 'true'
+        run: |
+          cat << EOF > README.md
+          # 🐍 GitHub Contribution Snake Game
+
+          ![Workflow Status](https://img.shields.io/github/actions/workflow/status/${{ github.repository }}/snake.yml?label=Snake%20Game&style=for-the-badge)
+
+          ## 🎮 Different Snake Variations
+
+          ### Standard Version
+          ![Standard Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/standard.svg)
+
+          ### Rainbow Mode 🌈
+          ![Rainbow Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/rainbow-snake.svg)
+
+          ### Dark Mode
+          ![Dark Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/dark-mode.svg)
+
+          ### Matrix Effect
+          ![Matrix Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/matrix-optimized.gif)
+
+          ### Ocean Wave
+          ![Ocean Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/ocean-optimized.gif)
+
+          ### Golden Snake
+          ![Golden Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/golden-optimized.gif)
+
+          *Auto-generated with ❤️ by GitHub Actions*
+          EOF
+
+      # Bước 6: Deploy lên branch output
+      - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: output
-          commit_message: "Update snake animation [skip ci]"
+          commit_message: "Update snake animations [skip ci]"
+          force_orphan: true
+
+      # Bước 7: Tự động tạo Pull Request nếu có thay đổi README
+      - name: 🔄 Create Pull Request
+        if: github.ref != 'refs/heads/output' && steps.snake.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "✨ Update Snake Animations & README"
+          branch: "update-snake-content"
+          base: "main"
+          body: |
+            Auto-generated PR with:
+            - New snake animations
+            - Updated README display
+            - Optimized GIF files
+          commit-message: "Update snake content [skip ci]"
+          labels: "automated,enhancement"
+
+      # Bước 8: Thông báo kết quả
+      - name: 📢 Notification
+        if: always()
+        run: |
+          echo "Snake generation completed with status: ${{ job.status }}"
+          echo "View results at: https://github.com/${{ github.repository }}/tree/output"
