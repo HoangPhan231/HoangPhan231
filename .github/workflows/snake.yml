@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     name: "🚀 Generate MEGA Snake Animations"
-    
+
     steps:
       # Bước 1: Checkout với full history để phân tích contribution
       - name: "🦾 SUPER Checkout"
@@ -48,10 +48,18 @@ jobs:
             dist/gold-dragon.gif?color_snake=linear-gradient(#ffd700,#ffcc00)&effect=scale
             dist/xmas-special.gif?color_snake=#ff0000&color_dots=#228b22&effect=fall
 
-      # Bước 4: Xử lý ảnh nâng cao (đã sửa lỗi)
+      # Bước 4: Kiểm tra quyền và nội dung thư mục dist
+      - name: "🔍 Debug Permissions"
+        run: |
+          echo "Checking permissions for current directory..."
+          ls -ld .
+          echo "Contents of dist directory:"
+          ls -l dist || echo "dist does not exist"
+
+      # Bước 5: Xử lý ảnh nâng cao
       - name: "🧠 IMAGE ENHANCEMENT"
         run: |
-          sudo rm -rf dist/enhanced && mkdir -p dist/enhanced
+          rm -rf dist/enhanced && mkdir -p dist/enhanced
           for gif in dist/*.gif; do
             if [[ -f "$gif" ]]; then
               filename=$(basename "$gif" .gif)
@@ -72,7 +80,7 @@ jobs:
             fi
           done
 
-      # Bước 5: Tạo video 4K từ animations
+      # Bước 6: Tạo video 4K từ animations
       - name: "🎥 4K VIDEO RENDER"
         run: |
           for gif in dist/*.gif; do
@@ -88,12 +96,12 @@ jobs:
             fi
           done
 
-      # Bước 6: Tạo trang web tương tác
+      # Bước 7: Tạo trang web tương tác
       - name: "🌐 Create INTERACTIVE WEBPAGE"
         run: |
-          echo "HTML code here" > dist/index.html
+          echo "<html><body><h1>Ultimate Snake Game 9000</h1></body></html>" > dist/index.html
 
-      # Bước 7: Deploy lên GitHub Pages
+      # Bước 8: Deploy lên GitHub Pages
       - name: "🚀 DEPLOY TO ORBIT"
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -103,7 +111,7 @@ jobs:
           commit_message: "🚀 DEPLOY: Ultimate Snake Game 9000 [skip ci]"
           force_orphan: true
 
-      # Bước 8: Thông báo kết quả hoành tráng
+      # Bước 9: Thông báo kết quả hoành tráng
       - name: "📢 MISSION ACCOMPLISHED"
         if: always()
         run: |
