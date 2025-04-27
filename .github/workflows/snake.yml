@@ -1,14 +1,14 @@
 name: GitHub Snake Game
 
 on:
-  # Schedule the workflow to run daily at midnight UTC
+  # Chạy workflow hằng ngày vào 0 giờ UTC
   schedule:
     - cron: "0 0 * * *"
-
-  # Allow manual triggering of the workflow
+  
+  # Cho phép chạy workflow thủ công
   workflow_dispatch:
 
-  # Trigger the workflow on pushes to the main branch
+  # Kích hoạt khi có thay đổi trên nhánh `main`
   push:
     branches:
       - main
@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      # Step 1: Checkout the repository
+      # Bước 1: Clone repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Generate the snake animations
+      # Bước 2: Tạo animation snake
       - name: Generate GitHub Contributions Snake Animations
         uses: Platane/snk@v3
         with:
@@ -35,11 +35,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 3: Deploy the generated files to the 'output' branch
+      # Bước 3: Deploy lên branch `output`
       - name: Deploy to Output Branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: dist
+          publish_dir: ./dist
           publish_branch: output
-          commit_message: "Update snake animation [skip ci]"   
+          commit_message: "Update snake animation [skip ci]"
