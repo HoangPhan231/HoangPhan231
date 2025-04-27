@@ -59,13 +59,11 @@ jobs:
       # Bước 5: Xử lý ảnh nâng cao
       - name: "🧠 IMAGE ENHANCEMENT"
         run: |
-          rm -rf dist/enhanced && mkdir -p dist/enhanced
+          sudo rm -rf dist/enhanced && mkdir -p dist/enhanced
           for gif in dist/*.gif; do
             if [[ -f "$gif" ]]; then
               filename=$(basename "$gif" .gif)
               echo "✨ Enhancing $filename.gif"
-              
-              # Tăng chất lượng với ImageMagick
               convert "$gif" \
                 -brightness-contrast 10x10 \
                 -unsharp 0x1.0+1.0+0.02 \
@@ -74,8 +72,6 @@ jobs:
                 -dither FloydSteinberg \
                 -colors 256 \
                 "dist/enhanced/${filename}-enhanced.gif"
-              
-              # Tạo phiên bản webp chất lượng cao
               convert "$gif" "dist/enhanced/${filename}-enhanced.webp"
             fi
           done
