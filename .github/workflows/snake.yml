@@ -1,4 +1,4 @@
-name: "🐍🔥 ULTIMATE SNAKE GAME 9000 🔥🐍"
+name: 🐍 GitHub Snake Game Plus Deluxe
 
 on:
   schedule:
@@ -6,88 +6,124 @@ on:
   workflow_dispatch:     # Cho phép chạy thủ công
   push:
     branches:
-      - main
+      - main           # Kích hoạt khi push vào main
 
 jobs:
-  generate-epic-snake:
+  generate-snake:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    name: "🚀 Generate MEGA Snake Animations"
+    timeout-minutes: 20
+    name: Generate awesome snake animations
 
     steps:
-      # Bước 1: Checkout với full history để phân tích contribution
-      - name: "🦾 SUPER Checkout"
+      # Bước 1: Checkout code
+      - name: 🛎️ Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Bước 2: Cài đặt các công cụ xử lý ảnh
-      - name: "⚡ Install POWER Tools"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick ffmpeg python3-pip
-          pip install numpy matplotlib scikit-image opencv-python-headless
-          
-      # Bước 3: Tạo 12 phiên bản snake KHỦNG
-      - name: "🎇 Generate GALAXY of Snakes"
+      # Bước 2: Tạo nhiều phiên bản snake khác nhau
+      - name: 🎨 Generate Snake Animations
         uses: Platane/snk@v3
         id: snake
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
             dist/standard.svg
-            dist/rainbow-unicorn.svg?color_snake=rainbow&color_dots=random&size=large
-            dist/cyberpunk.gif?color_snake=neonpink&color_dots=#0ff0fc,#ff00ff&background=#121d30&delay=5
-            dist/matrix-4k.gif?color_snake=#00ff41&color_dots=#003b00&background=black&delay=3&size=xlarge
-            dist/ocean-3d.gif?color_snake=#ff8c00&color_dots=#1e90ff,#00bfff,#87cefa&effect=wave
-            dist/fire-snake.gif?color_snake=flame&color_dots=#ff4500,#ff8c00&effect=fire
-            dist/ice-king.svg?color_snake=#00ffff&color_dots=#add8e6,#87ceeb&effect=crystal
-            dist/nebula.gif?color_snake=#9b30ff&color_dots=#ff1493,#9400d3&background=#000033&effect=swirl
-            dist/8bit-arcade.gif?color_snake=#ff0000&color_dots=#ffff00,#00ff00&effect=pixel
-            dist/quantum.gif?color_snake=#00ff00&color_dots=#ff00ff&effect=glitch
-            dist/gold-dragon.gif?color_snake=linear-gradient(#ffd700,#ffcc00)&effect=scale
-            dist/xmas-special.gif?color_snake=#ff0000&color_dots=#228b22&effect=fall
+            dist/rainbow-snake.svg?color_snake=rainbow&color_dots=random
+            dist/dark-mode.svg?palette=github-dark&color_snake=#00ff00
+            dist/matrix.gif?color_snake=#00ff00&color_dots=#004400&background=black&delay=10
+            dist/ocean-wave.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9&delay=15
+            dist/golden-snake.gif?color_snake=gold&color_dots=#ffd700,#ffcc00,#ffc000
+            dist/glitch-snake.gif?color_snake=cyan&effect=glitch
+            dist/aurora-snake.gif?color_snake=#88c0d0&effect=aurora
+            dist/fire-snake.gif?color_snake=red&effect=fire
 
-      # Bước 4: Tạo video 4K từ animations
-      - name: "🎥 4K VIDEO RENDER"
+      # Bước 3: Cài đặt ImageMagick để xử lý ảnh
+      - name: 🛠️ Install ImageMagick
+        if: steps.snake.outputs.has_changes == 'true'
+        run: sudo apt-get install -y imagemagick
+
+      # Bước 4: Tối ưu kích thước file ảnh
+      - name: ✨ Optimize Images
+        if: steps.snake.outputs.has_changes == 'true'
         run: |
-          mkdir -p dist/enhanced
-          for gif in dist/*.gif; do
-            if [[ -f "$gif" ]]; then
-              filename=$(basename "$gif" .gif)
-              ffmpeg -i "$gif" \
-                -c:v libx264 \
-                -preset slow \
-                -crf 18 \
-                -pix_fmt yuv420p \
-                -movflags +faststart \
-                "dist/enhanced/${filename}-4k.mp4"
-            fi
-          done
+          convert dist/matrix.gif -resize 800x400 -layers optimize dist/matrix-optimized.gif
+          convert dist/ocean-wave.gif -resize 800x400 -layers optimize dist/ocean-optimized.gif
+          convert dist/golden-snake.gif -resize 800x400 -layers optimize dist/golden-optimized.gif
+          convert dist/glitch-snake.gif -resize 800x400 -layers optimize dist/glitch-optimized.gif
+          convert dist/aurora-snake.gif -resize 800x400 -layers optimize dist/aurora-optimized.gif
+          convert dist/fire-snake.gif -resize 800x400 -layers optimize dist/fire-optimized.gif
 
-      # Bước 5: Tạo trang web tương tác
-      - name: "🌐 Create INTERACTIVE WEBPAGE"
+      # Bước 5: Tạo README tự động
+      - name: 📝 Generate Dynamic README
+        if: steps.snake.outputs.has_changes == 'true'
         run: |
-          echo "<html><body><h1>Ultimate Snake Game 9000</h1></body></html>" > dist/index.html
+          cat << EOF > README.md
+          # 🐍 GitHub Contribution Snake Game Deluxe
 
-      # Bước 6: Deploy lên GitHub Pages
-      - name: "🚀 DEPLOY TO ORBIT"
+          ![Workflow Status](https://img.shields.io/github/actions/workflow/status/${{ github.repository }}/snake.yml?label=Snake%20Game&style=for-the-badge)
+
+          ## 🎮 Different Snake Variations
+
+          ### Standard Version
+          ![Standard Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/standard.svg)
+
+          ### Rainbow Mode 🌈
+          ![Rainbow Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/rainbow-snake.svg)
+
+          ### Dark Mode
+          ![Dark Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/dark-mode.svg)
+
+          ### Matrix Effect
+          ![Matrix Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/matrix-optimized.gif)
+
+          ### Ocean Wave
+          ![Ocean Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/ocean-optimized.gif)
+
+          ### Golden Snake
+          ![Golden Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/golden-optimized.gif)
+
+          ### Glitch Effect
+          ![Glitch Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/glitch-optimized.gif)
+
+          ### Aurora Snake
+          ![Aurora Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/aurora-optimized.gif)
+
+          ### Fire Snake
+          ![Fire Snake](https://raw.githubusercontent.com/${{ github.repository }}/output/dist/fire-optimized.gif)
+
+          *Auto-generated with ❤️ by GitHub Actions*
+          EOF
+
+      # Bước 6: Deploy lên branch output
+      - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          publish_branch: gh-pages
-          commit_message: "🚀 DEPLOY: Ultimate Snake Game 9000 [skip ci]"
+          publish_branch: output
+          commit_message: "Update snake animations [skip ci]"
           force_orphan: true
 
-      # Bước 7: Thông báo kết quả hoành tráng
-      - name: "📢 MISSION ACCOMPLISHED"
+      # Bước 7: Tự động tạo Pull Request nếu có thay đổi README
+      - name: 🔄 Create Pull Request
+        if: github.ref != 'refs/heads/output' && steps.snake.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "✨ Update Snake Animations & README"
+          branch: "update-snake-content"
+          base: "main"
+          body: |
+            Auto-generated PR with:
+            - New snake animations
+            - Updated README display
+            - Optimized GIF files
+          commit-message: "Update snake content [skip ci]"
+          labels: "automated,enhancement"
+
+      # Bước 8: Thông báo kết quả
+      - name: 📢 Notification
         if: always()
         run: |
-          echo ""
-          echo "🐍 SNAKES GENERATED:"
-          if [ -d "dist/enhanced" ]; then
-            ls -lh dist/enhanced/
-          else
-            echo "⚠️ WARNING: Directory 'dist/enhanced/' does not exist."
-          fi
+          echo "Snake generation completed with status: ${{ job.status }}"
+          echo "View results at: https://github.com/${{ github.repository }}/tree/output"
