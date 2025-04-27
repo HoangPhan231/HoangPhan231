@@ -21,12 +21,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Bước 2: Cài đặt các công cụ AI và xử lý ảnh
+      # Bước 2: Cài đặt các công cụ xử lý ảnh
       - name: "⚡ Install POWER Tools"
         run: |
           sudo apt-get update
           sudo apt-get install -y imagemagick ffmpeg python3-pip
-          pip install numpy matplotlib scikit-image
+          pip install numpy matplotlib scikit-image opencv-python-headless
           
       # Bước 3: Tạo 12 phiên bản snake KHỦNG
       - name: "🎇 Generate GALAXY of Snakes"
@@ -48,68 +48,204 @@ jobs:
             dist/gold-dragon.gif?color_snake=linear-gradient(#ffd700,#ffcc00)&effect=scale
             dist/xmas-special.gif?color_snake=#ff0000&color_dots=#228b22&effect=fall
 
-      # Bước 4: AI Enhanced Processing
-      - name: "🧠 AI ENHANCEMENT"
+      # Bước 4: Xử lý ảnh nâng cao (đã sửa lỗi)
+      - name: "🧠 IMAGE ENHANCEMENT"
         run: |
-          python3 <<EOF
-          # AI-based image enhancement script
-          import cv2
-          import numpy as np
-          from skimage import filters
-          
-          # Process each GIF with AI magic
-          for gif in ['cyberpunk', 'matrix-4k', 'ocean-3d', 'fire-snake', 'nebula', 'quantum']:
-              input_path = f'dist/{gif}.gif'
-              output_path = f'dist/{gif}-enhanced.gif'
+          mkdir -p dist/enhanced
+          for gif in dist/*.gif; do
+            if [[ -f "$gif" ]]; then
+              filename=$(basename "$gif" .gif)
+              echo "✨ Enhancing $filename.gif"
               
-              # AI processing magic happens here
-              # (This is a conceptual example)
-              print(f"✨ Applying AI enhancements to {gif}.gif")
-          EOF
+              # Tăng chất lượng với ImageMagick
+              convert "$gif" \
+                -brightness-contrast 10x10 \
+                -unsharp 0x1.0+1.0+0.02 \
+                -define filter:filter=Robidoux \
+                -define filter:blur=0.9142 \
+                -dither FloydSteinberg \
+                -colors 256 \
+                "dist/enhanced/${filename}-enhanced.gif"
+              
+              # Tạo phiên bản webp chất lượng cao
+              convert "$gif" "dist/enhanced/${filename}-enhanced.webp"
+            fi
+          done
 
       # Bước 5: Tạo video 4K từ animations
       - name: "🎥 4K VIDEO RENDER"
         run: |
-          ffmpeg -i dist/matrix-4k.gif -c:v libx264 -pix_fmt yuv420p -movflags +faststart dist/matrix-4k.mp4
-          ffmpeg -i dist/cyberpunk.gif -vf "scale=3840:2160" -c:v libx264 -preset slow -crf 18 dist/cyberpunk-4k.mp4
+          for gif in dist/*.gif; do
+            if [[ -f "$gif" ]]; then
+              filename=$(basename "$gif" .gif)
+              ffmpeg -i "$gif" \
+                -c:v libx264 \
+                -preset slow \
+                -crf 18 \
+                -pix_fmt yuv420p \
+                -movflags +faststart \
+                "dist/enhanced/${filename}-4k.mp4"
+            fi
+          done
 
       # Bước 6: Tạo trang web tương tác
       - name: "🌐 Create INTERACTIVE WEBPAGE"
         run: |
           cat << 'EOF' > dist/index.html
           <!DOCTYPE html>
-          <html>
+          <html lang="en">
           <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>🐍 ULTIMATE SNAKE GAME 9000 🐍</title>
               <style>
-                  body { background: #000; color: #0f0; font-family: 'Courier New', monospace; }
-                  .snake-container { display: flex; flex-wrap: wrap; justify-content: center; }
-                  .snake-box { margin: 20px; text-align: center; }
-                  h1 { text-align: center; color: #ff0; font-size: 3em; text-shadow: 0 0 10px #ff0; }
-                  select { background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; }
+                  :root {
+                      --matrix-green: #00ff41;
+                      --cyberpunk-pink: #ff00ff;
+                      --cyberpunk-blue: #0ff0fc;
+                      --fire-orange: #ff8c00;
+                  }
+                  body {
+                      background: #000;
+                      color: var(--matrix-green);
+                      font-family: 'Courier New', monospace;
+                      margin: 0;
+                      padding: 20px;
+                  }
+                  header {
+                      text-align: center;
+                      margin-bottom: 30px;
+                  }
+                  h1 {
+                      font-size: 2.5rem;
+                      text-shadow: 0 0 10px currentColor;
+                      animation: glow 2s ease-in-out infinite alternate;
+                  }
+                  .container {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      max-width: 1200px;
+                      margin: 0 auto;
+                  }
+                  .controls {
+                      margin-bottom: 20px;
+                      display: flex;
+                      gap: 15px;
+                      flex-wrap: wrap;
+                      justify-content: center;
+                  }
+                  select, button {
+                      background: #111;
+                      color: var(--cyberpunk-blue);
+                      border: 1px solid var(--cyberpunk-pink);
+                      padding: 10px 15px;
+                      font-family: inherit;
+                      cursor: pointer;
+                  }
+                  .snake-display {
+                      border: 3px solid var(--cyberpunk-pink);
+                      max-width: 100%;
+                      box-shadow: 0 0 20px var(--cyberpunk-pink);
+                  }
+                  .gallery {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                      gap: 20px;
+                      margin-top: 30px;
+                  }
+                  .gallery img {
+                      width: 100%;
+                      border: 1px solid #333;
+                      transition: transform 0.3s;
+                  }
+                  .gallery img:hover {
+                      transform: scale(1.05);
+                  }
+                  @keyframes glow {
+                      from { text-shadow: 0 0 5px currentColor; }
+                      to { text-shadow: 0 0 15px currentColor, 0 0 20px currentColor; }
+                  }
               </style>
           </head>
           <body>
-              <h1>🌟 ULTIMATE SNAKE GAME 9000 🌟</h1>
-              <div style="text-align: center;">
-                  <select id="snakeSelector" onchange="changeSnake()">
-                      <option value="matrix-4k">MATRIX 4K</option>
-                      <option value="cyberpunk">CYBERPUNK</option>
-                      <option value="quantum">QUANTUM GLITCH</option>
-                      <option value="fire-snake">FIRE SNAKE</option>
-                      <option value="gold-dragon">GOLD DRAGON</option>
-                  </select>
-              </div>
-              <div class="snake-container">
-                  <div class="snake-box">
-                      <img id="mainSnake" src="matrix-4k.gif" style="max-width: 800px; border: 3px solid #0f0;">
+              <div class="container">
+                  <header>
+                      <h1>🌟 ULTIMATE SNAKE GAME 9000 🌟</h1>
+                      <p>Your GitHub contributions have never looked this EPIC!</p>
+                  </header>
+                  
+                  <div class="controls">
+                      <select id="snakeSelector">
+                          <option value="matrix-4k-enhanced">MATRIX 4K</option>
+                          <option value="cyberpunk-enhanced">CYBERPUNK</option>
+                          <option value="quantum-enhanced">QUANTUM GLITCH</option>
+                          <option value="fire-snake-enhanced">FIRE SNAKE</option>
+                          <option value="gold-dragon-enhanced">GOLD DRAGON</option>
+                          <option value="nebula-enhanced">NEBULA</option>
+                      </select>
+                      
+                      <button id="downloadBtn">DOWNLOAD CURRENT</button>
+                      <button id="randomBtn">RANDOM SNAKE</button>
+                  </div>
+                  
+                  <div class="main-display">
+                      <img id="mainSnake" 
+                          src="enhanced/matrix-4k-enhanced.gif" 
+                          alt="Selected Snake Animation" 
+                          class="snake-display">
+                  </div>
+                  
+                  <div class="gallery">
+                      <h2>✨ SNAKE GALLERY ✨</h2>
+                      <div id="galleryContainer"></div>
                   </div>
               </div>
+              
               <script>
-                  function changeSnake() {
-                      const selected = document.getElementById('snakeSelector').value;
-                      document.getElementById('mainSnake').src = selected + '-enhanced.gif';
-                  }
+                  const snakes = [
+                      'matrix-4k-enhanced', 'cyberpunk-enhanced', 
+                      'quantum-enhanced', 'fire-snake-enhanced',
+                      'gold-dragon-enhanced', 'nebula-enhanced',
+                      'ocean-3d-enhanced', '8bit-arcade-enhanced'
+                  ];
+                  
+                  // Load gallery
+                  const gallery = document.getElementById('galleryContainer');
+                  snakes.forEach(snake => {
+                      const img = document.createElement('img');
+                      img.src = `enhanced/${snake}.gif`;
+                      img.alt = snake;
+                      img.title = snake.replace('-enhanced', '');
+                      img.onclick = () => {
+                          document.getElementById('mainSnake').src = `enhanced/${snake}.gif`;
+                          document.getElementById('snakeSelector').value = snake;
+                      };
+                      gallery.appendChild(img);
+                  });
+                  
+                  // Selector change
+                  document.getElementById('snakeSelector').addEventListener('change', (e) => {
+                      document.getElementById('mainSnake').src = `enhanced/${e.target.value}.gif`;
+                  });
+                  
+                  // Random button
+                  document.getElementById('randomBtn').addEventListener('click', () => {
+                      const randomSnake = snakes[Math.floor(Math.random() * snakes.length)];
+                      document.getElementById('mainSnake').src = `enhanced/${randomSnake}.gif`;
+                      document.getElementById('snakeSelector').value = randomSnake;
+                  });
+                  
+                  // Download button
+                  document.getElementById('downloadBtn').addEventListener('click', () => {
+                      const currentSnake = document.getElementById('snakeSelector').value;
+                      const link = document.createElement('a');
+                      link.href = `enhanced/${currentSnake}.gif`;
+                      link.download = `${currentSnake}.gif`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                  });
               </script>
           </body>
           </html>
@@ -129,6 +265,7 @@ jobs:
       - name: "📢 MISSION ACCOMPLISHED"
         if: always()
         run: |
+          echo ""
           echo "███████╗███╗   ██╗███████╗██╗  ██╗"
           echo "██╔════╝████╗  ██║██╔════╝██║  ██║"
           echo "█████╗  ██╔██╗ ██║███████╗███████║"
@@ -136,6 +273,16 @@ jobs:
           echo "███████╗██║ ╚████║███████║██║  ██║"
           echo "╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
           echo ""
+          echo "   ███████╗███╗   ██╗███████╗██╗  ██╗"
+          echo "   ██╔════╝████╗  ██║██╔════╝██║  ██║"
+          echo "   █████╗  ██╔██╗ ██║█████╗  ███████║"
+          echo "   ██╔══╝  ██║╚██╗██║██╔══╝  ██╔══██║"
+          echo "   ██║     ██║ ╚████║███████╗██║  ██║"
+          echo "   ╚═╝     ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
+          echo ""
           echo "🚀 ULTIMATE SNAKE GAME 9000 DEPLOYED SUCCESSFULLY!"
           echo "🌐 View at: https://${{ github.repository_owner }}.github.io/${{ github.repository_name }}"
-          echo "🎥 4K Videos available in /dist directory"
+          echo "🎥 4K Videos available in /enhanced directory"
+          echo ""
+          echo "🐍 SNAKES GENERATED:"
+          ls -lh dist/enhanced/
