@@ -120,4 +120,4 @@ pie title Weekly Development Breakdown
   </a>
 </p>
 
-![snake gif](https://github.com/HoangPhan231/HoangPhan231/blob/output/standard.svg)
+![snake gif](https://github.com/HoangPhan231/HoangPhan231/blob/output/spacecraft-flyby.svg)
