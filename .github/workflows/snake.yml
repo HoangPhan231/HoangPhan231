@@ -48,41 +48,29 @@ jobs:
             dist/gold-dragon.gif?color_snake=linear-gradient(#ffd700,#ffcc00)&effect=scale
             dist/xmas-special.gif?color_snake=#ff0000&color_dots=#228b22&effect=fall
 
-      # Bước 4: Kiểm tra quyền và nội dung thư mục dist
-      - name: "🔍 Debug Permissions"
+      # Bước 4: Tạo video 4K từ animations
+      - name: "🎥 4K VIDEO RENDER"
         run: |
-          echo "Checking permissions for current directory..."
-          ls -ld .
-          echo "Contents of dist directory:"
-          ls -l dist || echo "dist does not exist"
-
-      # Bước 5: Xử lý ảnh nâng cao
-      - name: "🧠 IMAGE ENHANCEMENT"
-        run: |
-          mkdir -p dist
-          rm -rf dist/enhanced && mkdir -p dist/enhanced
+          mkdir -p dist/enhanced
           for gif in dist/*.gif; do
             if [[ -f "$gif" ]]; then
               filename=$(basename "$gif" .gif)
-              echo "✨ Enhancing $filename.gif"
-              convert "$gif" \
-                -brightness-contrast 10x10 \
-                -unsharp 0x1.0+1.0+0.02 \
-                -define filter:filter=Robidoux \
-                -define filter:blur=0.9142 \
-                -dither FloydSteinberg \
-                -colors 256 \
-                "dist/enhanced/${filename}-enhanced.gif"
-              convert "$gif" "dist/enhanced/${filename}-enhanced.webp"
+              ffmpeg -i "$gif" \
+                -c:v libx264 \
+                -preset slow \
+                -crf 18 \
+                -pix_fmt yuv420p \
+                -movflags +faststart \
+                "dist/enhanced/${filename}-4k.mp4"
             fi
           done
 
-      # Bước 7: Tạo trang web tương tác
+      # Bước 5: Tạo trang web tương tác
       - name: "🌐 Create INTERACTIVE WEBPAGE"
         run: |
           echo "<html><body><h1>Ultimate Snake Game 9000</h1></body></html>" > dist/index.html
 
-      # Bước 8: Deploy lên GitHub Pages
+      # Bước 6: Deploy lên GitHub Pages
       - name: "🚀 DEPLOY TO ORBIT"
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -92,7 +80,7 @@ jobs:
           commit_message: "🚀 DEPLOY: Ultimate Snake Game 9000 [skip ci]"
           force_orphan: true
 
-      # Bước 9: Thông báo kết quả hoành tráng
+      # Bước 7: Thông báo kết quả hoành tráng
       - name: "📢 MISSION ACCOMPLISHED"
         if: always()
         run: |
