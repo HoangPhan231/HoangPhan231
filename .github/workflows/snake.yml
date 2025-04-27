@@ -59,7 +59,8 @@ jobs:
       # Bước 5: Xử lý ảnh nâng cao
       - name: "🧠 IMAGE ENHANCEMENT"
         run: |
-          sudo rm -rf dist/enhanced && mkdir -p dist/enhanced
+          mkdir -p dist
+          rm -rf dist/enhanced && mkdir -p dist/enhanced
           for gif in dist/*.gif; do
             if [[ -f "$gif" ]]; then
               filename=$(basename "$gif" .gif)
@@ -73,22 +74,6 @@ jobs:
                 -colors 256 \
                 "dist/enhanced/${filename}-enhanced.gif"
               convert "$gif" "dist/enhanced/${filename}-enhanced.webp"
-            fi
-          done
-
-      # Bước 6: Tạo video 4K từ animations
-      - name: "🎥 4K VIDEO RENDER"
-        run: |
-          for gif in dist/*.gif; do
-            if [[ -f "$gif" ]]; then
-              filename=$(basename "$gif" .gif)
-              ffmpeg -i "$gif" \
-                -c:v libx264 \
-                -preset slow \
-                -crf 18 \
-                -pix_fmt yuv420p \
-                -movflags +faststart \
-                "dist/enhanced/${filename}-4k.mp4"
             fi
           done
 
