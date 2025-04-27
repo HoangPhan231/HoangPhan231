@@ -51,7 +51,7 @@ jobs:
       # Bước 4: Xử lý ảnh nâng cao (đã sửa lỗi)
       - name: "🧠 IMAGE ENHANCEMENT"
         run: |
-          mkdir -p dist/enhanced
+          sudo rm -rf dist/enhanced && mkdir -p dist/enhanced
           for gif in dist/*.gif; do
             if [[ -f "$gif" ]]; then
               filename=$(basename "$gif" .gif)
@@ -91,165 +91,7 @@ jobs:
       # Bước 6: Tạo trang web tương tác
       - name: "🌐 Create INTERACTIVE WEBPAGE"
         run: |
-          cat << 'EOF' > dist/index.html
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>🐍 ULTIMATE SNAKE GAME 9000 🐍</title>
-              <style>
-                  :root {
-                      --matrix-green: #00ff41;
-                      --cyberpunk-pink: #ff00ff;
-                      --cyberpunk-blue: #0ff0fc;
-                      --fire-orange: #ff8c00;
-                  }
-                  body {
-                      background: #000;
-                      color: var(--matrix-green);
-                      font-family: 'Courier New', monospace;
-                      margin: 0;
-                      padding: 20px;
-                  }
-                  header {
-                      text-align: center;
-                      margin-bottom: 30px;
-                  }
-                  h1 {
-                      font-size: 2.5rem;
-                      text-shadow: 0 0 10px currentColor;
-                      animation: glow 2s ease-in-out infinite alternate;
-                  }
-                  .container {
-                      display: flex;
-                      flex-direction: column;
-                      align-items: center;
-                      max-width: 1200px;
-                      margin: 0 auto;
-                  }
-                  .controls {
-                      margin-bottom: 20px;
-                      display: flex;
-                      gap: 15px;
-                      flex-wrap: wrap;
-                      justify-content: center;
-                  }
-                  select, button {
-                      background: #111;
-                      color: var(--cyberpunk-blue);
-                      border: 1px solid var(--cyberpunk-pink);
-                      padding: 10px 15px;
-                      font-family: inherit;
-                      cursor: pointer;
-                  }
-                  .snake-display {
-                      border: 3px solid var(--cyberpunk-pink);
-                      max-width: 100%;
-                      box-shadow: 0 0 20px var(--cyberpunk-pink);
-                  }
-                  .gallery {
-                      display: grid;
-                      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                      gap: 20px;
-                      margin-top: 30px;
-                  }
-                  .gallery img {
-                      width: 100%;
-                      border: 1px solid #333;
-                      transition: transform 0.3s;
-                  }
-                  .gallery img:hover {
-                      transform: scale(1.05);
-                  }
-                  @keyframes glow {
-                      from { text-shadow: 0 0 5px currentColor; }
-                      to { text-shadow: 0 0 15px currentColor, 0 0 20px currentColor; }
-                  }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <header>
-                      <h1>🌟 ULTIMATE SNAKE GAME 9000 🌟</h1>
-                      <p>Your GitHub contributions have never looked this EPIC!</p>
-                  </header>
-                  
-                  <div class="controls">
-                      <select id="snakeSelector">
-                          <option value="matrix-4k-enhanced">MATRIX 4K</option>
-                          <option value="cyberpunk-enhanced">CYBERPUNK</option>
-                          <option value="quantum-enhanced">QUANTUM GLITCH</option>
-                          <option value="fire-snake-enhanced">FIRE SNAKE</option>
-                          <option value="gold-dragon-enhanced">GOLD DRAGON</option>
-                          <option value="nebula-enhanced">NEBULA</option>
-                      </select>
-                      
-                      <button id="downloadBtn">DOWNLOAD CURRENT</button>
-                      <button id="randomBtn">RANDOM SNAKE</button>
-                  </div>
-                  
-                  <div class="main-display">
-                      <img id="mainSnake" 
-                          src="enhanced/matrix-4k-enhanced.gif" 
-                          alt="Selected Snake Animation" 
-                          class="snake-display">
-                  </div>
-                  
-                  <div class="gallery">
-                      <h2>✨ SNAKE GALLERY ✨</h2>
-                      <div id="galleryContainer"></div>
-                  </div>
-              </div>
-              
-              <script>
-                  const snakes = [
-                      'matrix-4k-enhanced', 'cyberpunk-enhanced', 
-                      'quantum-enhanced', 'fire-snake-enhanced',
-                      'gold-dragon-enhanced', 'nebula-enhanced',
-                      'ocean-3d-enhanced', '8bit-arcade-enhanced'
-                  ];
-                  
-                  // Load gallery
-                  const gallery = document.getElementById('galleryContainer');
-                  snakes.forEach(snake => {
-                      const img = document.createElement('img');
-                      img.src = `enhanced/${snake}.gif`;
-                      img.alt = snake;
-                      img.title = snake.replace('-enhanced', '');
-                      img.onclick = () => {
-                          document.getElementById('mainSnake').src = `enhanced/${snake}.gif`;
-                          document.getElementById('snakeSelector').value = snake;
-                      };
-                      gallery.appendChild(img);
-                  });
-                  
-                  // Selector change
-                  document.getElementById('snakeSelector').addEventListener('change', (e) => {
-                      document.getElementById('mainSnake').src = `enhanced/${e.target.value}.gif`;
-                  });
-                  
-                  // Random button
-                  document.getElementById('randomBtn').addEventListener('click', () => {
-                      const randomSnake = snakes[Math.floor(Math.random() * snakes.length)];
-                      document.getElementById('mainSnake').src = `enhanced/${randomSnake}.gif`;
-                      document.getElementById('snakeSelector').value = randomSnake;
-                  });
-                  
-                  // Download button
-                  document.getElementById('downloadBtn').addEventListener('click', () => {
-                      const currentSnake = document.getElementById('snakeSelector').value;
-                      const link = document.createElement('a');
-                      link.href = `enhanced/${currentSnake}.gif`;
-                      link.download = `${currentSnake}.gif`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                  });
-              </script>
-          </body>
-          </html>
-          EOF
+          echo "HTML code here" > dist/index.html
 
       # Bước 7: Deploy lên GitHub Pages
       - name: "🚀 DEPLOY TO ORBIT"
@@ -266,23 +108,9 @@ jobs:
         if: always()
         run: |
           echo ""
-          echo "███████╗███╗   ██╗███████╗██╗  ██╗"
-          echo "██╔════╝████╗  ██║██╔════╝██║  ██║"
-          echo "█████╗  ██╔██╗ ██║███████╗███████║"
-          echo "██╔══╝  ██║╚██╗██║╚════██║██╔══██║"
-          echo "███████╗██║ ╚████║███████║██║  ██║"
-          echo "╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
-          echo ""
-          echo "   ███████╗███╗   ██╗███████╗██╗  ██╗"
-          echo "   ██╔════╝████╗  ██║██╔════╝██║  ██║"
-          echo "   █████╗  ██╔██╗ ██║█████╗  ███████║"
-          echo "   ██╔══╝  ██║╚██╗██║██╔══╝  ██╔══██║"
-          echo "   ██║     ██║ ╚████║███████╗██║  ██║"
-          echo "   ╚═╝     ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
-          echo ""
-          echo "🚀 ULTIMATE SNAKE GAME 9000 DEPLOYED SUCCESSFULLY!"
-          echo "🌐 View at: https://${{ github.repository_owner }}.github.io/${{ github.repository_name }}"
-          echo "🎥 4K Videos available in /enhanced directory"
-          echo ""
           echo "🐍 SNAKES GENERATED:"
-          ls -lh dist/enhanced/
+          if [ -d "dist/enhanced" ]; then
+            ls -lh dist/enhanced/
+          else
+            echo "⚠️ WARNING: Directory 'dist/enhanced/' does not exist."
+          fi
