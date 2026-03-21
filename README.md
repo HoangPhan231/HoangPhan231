@@ -85,7 +85,7 @@ pie title Weekly Development Breakdown
 
 <p align="center">
   <!-- LinkedIn -->
-  <a href="https://www.linkedin.com/in/thehoang-phan-706a3b231/">
+  <a href="https://www.linkedin.com/in/thehoang-engineer/">
     <img 
       src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" 
       alt="LinkedIn" />
